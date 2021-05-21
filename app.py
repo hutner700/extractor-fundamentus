@@ -49,6 +49,7 @@ def extrator(ativo):
 
         for element in (varia[0].to_numpy()):
             dfo.append({f'{element[0]}': element[1]})
+        #o for abaixo serve para retirar valores que são 'nan', pois isso pode dar algum erro ao json
         for osc in dfo:
             if str(list(osc.keys())[0]) == 'nan':
                 dfo.remove(osc)
