@@ -2,11 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from flask import Flask, make_response
-import time
 import numpy as np
-import json
 import lxml
-from operator import itemgetter
 
 
 def extrator(ativo):
