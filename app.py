@@ -8,7 +8,6 @@ import lxml
 
 
 def extrator(ativo):
-    #Ativo = String, esse tem que se encontrar no site FUNDAMENTUS.
     try:
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"}
         r = requests.get(f'https://fundamentus.com.br/detalhes.php?papel={ativo}',headers=headers)
@@ -49,15 +48,19 @@ def extrator(ativo):
         colunas = ['Marcação', 'Variação']
 
         for element in (varia[0].to_numpy()):
-            dfm.append({f'Variacao em {element[0]}': element[1]})
+            dfo.append({f'{element[0]}': element[1]})
+        for osc in dfo:
+            if str(list(osc.keys())[0]) == 'nan':
+                dfo.remove(osc)
+        dfm.append({'Osciladores':dfo})
         #finalizando os osciladores
         #dataframe de indicadores
         dfi = []
         colunas = ['Indicador', 'Numero']
         for element in (varia[1].to_numpy()):
-            dfm.append({f'Indicador {element[0]}': element[1]})
-            dfm.append({f'Indicador {element[2]}': element[3]})
-        #dfm.append({'indicadores fundamentalistas': dfi})
+            dfi.append({f'{element[0]}': element[1]})
+            dfi.append({f'{element[2]}': element[3]})
+        dfm.append({'indicadores fundamentalistas': dfi})
         dfs.pop(0)
         #Finalizando extração de osciladores e indicadores
         #Inicializando extração dos Dados Balanços Patrimonial
@@ -68,19 +71,24 @@ def extrator(ativo):
         colunas = ['Caracteristica', 'Valor']
         for item in dfs[0]:
             for element in (item.to_numpy()):
-                dfm.append({element[0]: element[1]})
+                dfb.append({element[0]: element[1]})
+        dfm.append({'Dados Balanços Patrimoniais':dfb})
         dfs.pop(0)
         #Finalização dos Dados de Balancos Patrimoniais
 
         #Iniciando demonstrativo de resuldados:
         #demon (Demonstrativo) [0] se refere ao anual [1] ao trimestral
+        dft = []
+        dfa = []
         demon = np.split(dfs[0],[2],axis=1)
         demon[0],demon[1] = demon[0].drop([0,1],axis=0),demon[1].drop([0,1],axis=0)
         for elemento in demon[0].to_numpy():
-            dfm.append({f'{elemento[0]} anual':elemento[1]})
+            dfa.append({f'{elemento[0]}':elemento[1]})
+        dfm.append({'Demonstrativo Anual':dfa})
         demon.pop(0)
         for elemento in demon[0].to_numpy():
-            dfm.append({f'{elemento[0]} trimestral':elemento[1]})
+            dft.append({f'{elemento[0]}':elemento[1]})
+        dfm.append({'Demonstrativo Trimestral':dft})
 
 
         #Finalização e transformação em um dicionario unico
@@ -94,7 +102,6 @@ def extrator(ativo):
 app = Flask(__name__)
 app.config.update(
     Testing=True,
-    JSON_AS_ASCII = False,
     JSON_SORT_KEYS = False
 )
 
